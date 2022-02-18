@@ -1,9 +1,16 @@
 - hosts: webservers
 
   tasks:
+    - name: update apt
+      ansible.builtin.apt:
+        update_cache: yes
+      become: yes
+      tags: apt
+
     - name: install git
       ansible.builtin.apt:
         name: git
         state: present
         update_cache: yes
       become: yes
+      tags: git
