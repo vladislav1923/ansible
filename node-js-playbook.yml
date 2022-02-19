@@ -1,11 +1,6 @@
 - hosts: webservers
   vars:
-    users:
-      - { name: jaime, groups: root }
-      - { name: sanse, groups: root }
-      - { name: robert, groups: root }
-    server_name: "{{ ansible_hostname }}!"
-    deploy_date: "{{ ansible_date_time.date }}"
+    app_dir: app
 
   roles:
     - role: mrlesmithjr.nodejs
@@ -13,48 +8,35 @@
     - role: kevincoakley.postgres
 
   tasks:
-    - include_tasks: main.yml
-      vars:
-        ansible_distribution: ansible_distribution
-
-    - name: asking cow where we are
-      ansible.builtin.shell:
-        cmd: cowsay "Hello, from web server!"
-      register: cow_speech
-
-    - name: copy index.html
-      ansible.builtin.template:
-        src: templates/index.html
-        dest: "{{ root_dir }}/index.html"
-      when: ansible_distribution != "CentOS"
-      become: true
-
-    - name: copy nginx.conf
-      ansible.builtin.template:
-        src: templates/nginx.conf
-        dest: /etc/nginx/nginx.conf
-      when: ansible_distribution != "CentOS"
-      notify:
-        - restart nginx
-      become: true
-
-    - name: add users
-      ansible.builtin.user:
-        name: "{{ item.name }}"
+    - name: install git
+      ansible.builtin.apt:
+        name: git
         state: present
-        groups: "{{ item.groups }}"
-      loop: '{{ users }}'
-
-    - name: add users configs
-      ansible.builtin.template:
-        src: templates/.gitconfig
-        dest: '/home/{{item.name}}/.gitconfig'
-      loop: '{{ users }}'
+        update_cache: yes
+      when: ansible_distribution != "CentOS"
       become: true
 
-  handlers:
-    - name: restart nginx
-      ansible.builtin.service:
-        name: nginx
-        state: reloaded
+    - name: git clone app
+      ansible.builtin.git:
+        repo: https://github.com/hexlet-components/js-fastify-blog
+        dest: '/{{ app_dir }}'
+
+    - name: set env
+      ansible.builtin.copy:
+        src: files/.env
+        dest: '/{{ app_dir }}/.env'
       become: true
+
+    - name: npm install
+      community.general.npm:
+        path: '/{{ app_dir }}'
+
+    - name: setup app
+      shell: make setup
+      args:
+        chdir: '/{{ app_dir }}'
+
+    - name: start app
+      shell: make start
+      args:
+        chdir: '/{{ app_dir }}'

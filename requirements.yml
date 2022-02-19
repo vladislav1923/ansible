@@ -1,4 +1,5 @@
 roles:
   - name: mrlesmithjr.nodejs
+    nodejs_version: 16.x
 
   - name: kevincoakley.postgres
