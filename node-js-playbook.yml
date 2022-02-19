@@ -7,6 +7,11 @@
     server_name: "{{ ansible_hostname }}!"
     deploy_date: "{{ ansible_date_time.date }}"
 
+  roles:
+    - role: mrlesmithjr.nodejs
+
+    - role: kevincoakley.postgres
+
   tasks:
     - include_tasks: main.yml
       vars:
@@ -14,7 +19,7 @@
 
     - name: asking cow where we are
       ansible.builtin.shell:
-         cmd: cowsay "Hello, from web server!"
+        cmd: cowsay "Hello, from web server!"
       register: cow_speech
 
     - name: copy index.html
