@@ -1,12 +1,20 @@
 - hosts: webservers
+  vars:
+    server_name: "{{ ansible_hostname }}"
   tasks:
+    - name: install git
+      ansible.builtin.apt:
+        name: git
+        state: present
+        update_cache: yes
+      become: true
+
     - name: install nginx
       ansible.builtin.apt:
         name: nginx
         state: present
         update_cache: yes
       become: true
-      gather_facts: no
 
     - name: copy index.html
       ansible.builtin.template:
