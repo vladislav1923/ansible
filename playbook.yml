@@ -1,6 +1,10 @@
 - hosts: webservers
   vars:
     server_name: "{{ ansible_hostname }}"
+    users:
+      - { name: jaime, groups: root }
+      - { name: sanse, groups: root }
+      - { name: robert, groups: root }
   tasks:
     - name: install git
       ansible.builtin.apt:
@@ -28,6 +32,20 @@
         dest: /etc/nginx/nginx.conf
       notify:
         - restart nginx
+      become: true
+
+    - name: add users
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        state: present
+        groups: "{{ item.groups }}"
+      loop: '{{ users }}'
+
+    - name: add users configs
+      ansible.builtin.template:
+        src: templates/.gitconfig
+        dest: '/home/{{item.name}}/.gitconfig'
+      loop: '{{ users }}'
       become: true
 
   handlers:
