@@ -1,10 +1,11 @@
 - hosts: webservers
   vars:
-    server_name: "{{ ansible_hostname }}"
     users:
       - { name: jaime, groups: root }
       - { name: sanse, groups: root }
       - { name: robert, groups: root }
+    server_name: "{{ ansible_hostname }}!"
+    deploy_date: "{{ ansible_date_time.date }}"
   tasks:
     - name: install git
       ansible.builtin.apt:
