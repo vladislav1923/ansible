@@ -23,6 +23,18 @@
       when: ansible_distribution != "CentOS"
       become: true
 
+    - name: install cowsay
+      ansible.builtin.apt:
+        name: cowsay
+        state: present
+        update_cache: yes
+      become: true
+
+    - name: asking cow where we are
+      ansible.builtin.shell:
+         cmd: cowsay "Hello, from web server!"
+      register: cow_speech
+
     - name: copy index.html
       ansible.builtin.template:
         src: templates/index.html
